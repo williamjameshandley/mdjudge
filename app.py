@@ -153,6 +153,9 @@ class Handler(BaseHandler):
     def _file(self, name, ctype):
         super()._file(name.removeprefix("judge/"), ctype)
 
+    def _kit_file(self, name, ctype):
+        super()._kit_file(name.removeprefix("judge/"), ctype)
+
     def do_GET(self):
         path = self.path.split("?", 1)[0]
         if self._serve_static(path):
