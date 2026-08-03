@@ -1,0 +1,13 @@
+#!/bin/bash
+# Root-run provisioning from the install hook: the service state directory and
+# the one judgement deck, created as the service user so every card write is
+# an ordinary mddb commit under its identity.
+set -euo pipefail
+install -d -o mdjudge -g mdjudge -m 0750 /var/lib/mdjudge /var/lib/mdjudge/cache
+if [ ! -e /var/lib/mdjudge/queue/.git/HEAD ]; then
+  runuser -u mdjudge -- env \
+    GIT_AUTHOR_NAME=mdjudge GIT_AUTHOR_EMAIL=mdjudge@lovelace.fritz.box \
+    GIT_COMMITTER_NAME=mdjudge GIT_COMMITTER_EMAIL=mdjudge@lovelace.fritz.box \
+    XDG_CACHE_HOME=/var/lib/mdjudge/cache \
+    python3 -c 'import mddb; mddb.MDDB.init("/var/lib/mdjudge/queue")'
+fi

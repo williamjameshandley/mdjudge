@@ -1,0 +1,28 @@
+# Maintainer: Will Handley <wh260@cam.ac.uk>
+pkgname=mdjudge
+pkgver=$(grep '^version = ' pyproject.toml | head -1 | sed 's/.*= "\(.*\)"/\1/')
+pkgrel=1
+pkgdesc='mdjudge: the judgement queue PWA and API over an mddb deck'
+arch=('any')
+url='https://github.com/williamjameshandley/mdjudge'
+license=('MIT')
+depends=('python' 'python-mddb>=0.0.27' 'python-alan-pwa' 'nginx' 'git')
+install=mdjudge.install
+
+package() {
+  cd "$startdir"
+  local purelib
+  purelib=$(env -u VIRTUAL_ENV PATH=/usr/bin:/bin \
+    python -c 'import sysconfig; print(sysconfig.get_paths()["purelib"])')
+  install -Dm644 src/mdjudge/__init__.py "$pkgdir/$purelib/mdjudge/__init__.py"
+  install -Dm644 src/mdjudge/_core.py    "$pkgdir/$purelib/mdjudge/_core.py"
+  install -Dm644 app.py "$pkgdir/usr/lib/mdjudge/app.py"
+  for f in static/*; do
+    install -Dm644 "$f" "$pkgdir/usr/lib/mdjudge/static/$(basename "$f")"
+  done
+  install -Dm755 mdjudge-init "$pkgdir/usr/lib/mdjudge/mdjudge-init"
+  install -Dm644 mdjudge.service "$pkgdir/usr/lib/systemd/system/mdjudge.service"
+  install -Dm644 mdjudge.sysusers.conf "$pkgdir/usr/lib/sysusers.d/mdjudge.conf"
+  install -Dm644 mdjudge.tmpfiles.conf "$pkgdir/usr/lib/tmpfiles.d/mdjudge.conf"
+  install -Dm644 mdjudge.nginx.conf "$pkgdir/etc/nginx/lovelace.d/mdjudge.conf"
+}

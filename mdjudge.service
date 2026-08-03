@@ -1,0 +1,27 @@
+[Unit]
+Description=mdjudge: judgement queue PWA and API over the mddb deck
+After=network.target
+
+[Service]
+User=mdjudge
+Group=mdjudge
+Environment=DECK=/var/lib/mdjudge/queue
+Environment=SOCKET=/run/mdjudge/http.sock
+Environment=XDG_CACHE_HOME=/var/lib/mdjudge/cache
+Environment=GIT_AUTHOR_NAME=mdjudge
+Environment=GIT_AUTHOR_EMAIL=mdjudge@lovelace.fritz.box
+Environment=GIT_COMMITTER_NAME=mdjudge
+Environment=GIT_COMMITTER_EMAIL=mdjudge@lovelace.fritz.box
+ExecStart=/usr/bin/python3 /usr/lib/mdjudge/app.py
+UMask=0007
+Restart=on-failure
+RestartSec=5
+
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+PrivateTmp=true
+ReadWritePaths=/var/lib/mdjudge /run/mdjudge
+
+[Install]
+WantedBy=multi-user.target
