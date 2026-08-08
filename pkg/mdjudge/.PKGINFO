@@ -3,12 +3,12 @@
 pkgname = mdjudge
 pkgbase = mdjudge
 xdata = pkgtype=split
-pkgver = 0.0.2-1
+pkgver = 0.0.3-1
 pkgdesc = mdjudge: the judgement queue PWA and API over an mddb deck
 url = https://github.com/williamjameshandley/mdjudge
-builddate = 1786193126
+builddate = 1786193724
 packager = Unknown Packager
-size = 27042
+size = 21900
 arch = any
 license = MIT
 depend = python

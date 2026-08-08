@@ -3,12 +3,12 @@
 pkgname = mdjudge-client
 pkgbase = mdjudge
 xdata = pkgtype=split
-pkgver = 0.0.2-1
-pkgdesc = mdjudge-ask: post a judgement to Will and wait for the answer
+pkgver = 0.0.3-1
+pkgdesc = mdjudge: the judgement vocabulary and the composable HTTP client
 url = https://github.com/williamjameshandley/mdjudge
-builddate = 1786193126
+builddate = 1786193724
 packager = Unknown Packager
-size = 4430
+size = 9296
 arch = any
 license = MIT
 depend = python

@@ -14,11 +14,7 @@ package_mdjudge() {
   install=mdjudge.install
   depends=('python' 'python-mddb>=0.0.27' 'python-alan-pwa' 'nginx' 'git' 'mdjudge-client')
   cd "$startdir"
-  local purelib
-  purelib=$(env -u VIRTUAL_ENV PATH=/usr/bin:/bin \
-    python -c 'import sysconfig; print(sysconfig.get_paths()["purelib"])')
-  install -Dm644 src/mdjudge/__init__.py "$pkgdir/$purelib/mdjudge/__init__.py"
-  install -Dm644 src/mdjudge/_core.py    "$pkgdir/$purelib/mdjudge/_core.py"
+  cd "$startdir"
   install -Dm644 app.py "$pkgdir/usr/lib/mdjudge/app.py"
   for f in static/*; do
     install -Dm644 "$f" "$pkgdir/usr/lib/mdjudge/static/$(basename "$f")"
@@ -31,9 +27,14 @@ package_mdjudge() {
 }
 
 package_mdjudge-client() {
-  pkgdesc='mdjudge-ask: post a judgement to Will and wait for the answer'
+  pkgdesc='mdjudge: the judgement vocabulary and the composable HTTP client'
   depends=('python')
   install=""
   cd "$startdir"
-  install -Dm755 mdjudge-ask "$pkgdir/usr/bin/mdjudge-ask"
+  local purelib
+  purelib=$(env -u VIRTUAL_ENV PATH=/usr/bin:/bin \
+    python -c 'import sysconfig; print(sysconfig.get_paths()["purelib"])')
+  install -Dm644 src/mdjudge/__init__.py "$pkgdir/$purelib/mdjudge/__init__.py"
+  install -Dm644 src/mdjudge/_core.py    "$pkgdir/$purelib/mdjudge/_core.py"
+  install -Dm644 src/mdjudge/client.py   "$pkgdir/$purelib/mdjudge/client.py"
 }
