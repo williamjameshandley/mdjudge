@@ -42,11 +42,13 @@ def queue(availability):
     db = mddb.MDDB(DECK)
     sha = db.head()
     cards = []
+    ages = dict(db.conn.execute("SELECT id, first_commit FROM entries"))
     for card_id in mdjudge.open_requests(db, availability, now=_now()):
         card = db.read(card_id)
         cards.append(
             {
                 "id": card.id,
+                "asked": ages[card.id],
                 "title": card.title,
                 "summary": card.summary,
                 "options": card.yaml.get("options", []),

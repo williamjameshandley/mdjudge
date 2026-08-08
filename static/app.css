@@ -78,3 +78,4 @@ article.open { outline: 2px solid var(--accent); }
   padding: 0.8rem;
   font-size: 1rem;
 }
+.meta.stale { color: #e0a458; }

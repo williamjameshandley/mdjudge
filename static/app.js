@@ -57,7 +57,10 @@ function card(req) {
   summary.textContent = req.summary;
   const meta = document.createElement("p");
   meta.className = "meta";
-  meta.textContent = `${req.producer}${req.expires ? " · expires " + req.expires.slice(11, 16) : ""}`;
+  const hours = (Date.now() - Date.parse(req.asked)) / 3600000;
+  const age = hours < 2 ? "fresh" : hours < 48 ? `asked ${Math.round(hours)}h ago` : `asked ${Math.round(hours / 24)}d ago — evidence may be stale`;
+  meta.textContent = `${req.producer} · ${age}${req.expires ? " · expires " + req.expires.slice(11, 16) : ""}`;
+  if (hours >= 48) meta.classList.add("stale");
   head.append(title, summary, meta);
   head.onclick = () => {
     state.open = article.classList.contains("open") ? null : req.id;
