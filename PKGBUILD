@@ -1,5 +1,6 @@
 # Maintainer: Will Handley <wh260@cam.ac.uk>
-pkgname=mdjudge
+pkgbase=mdjudge
+pkgname=(mdjudge mdjudge-client)
 pkgver=$(grep '^version = ' pyproject.toml | head -1 | sed 's/.*= "\(.*\)"/\1/')
 pkgrel=1
 pkgdesc='mdjudge: the judgement queue PWA and API over an mddb deck'
@@ -7,9 +8,11 @@ arch=('any')
 url='https://github.com/williamjameshandley/mdjudge'
 license=('MIT')
 depends=('python' 'python-mddb>=0.0.27' 'python-alan-pwa' 'nginx' 'git')
-install=mdjudge.install
 
-package() {
+
+package_mdjudge() {
+  install=mdjudge.install
+  depends=('python' 'python-mddb>=0.0.27' 'python-alan-pwa' 'nginx' 'git' 'mdjudge-client')
   cd "$startdir"
   local purelib
   purelib=$(env -u VIRTUAL_ENV PATH=/usr/bin:/bin \
@@ -25,4 +28,12 @@ package() {
   install -Dm644 mdjudge.sysusers.conf "$pkgdir/usr/lib/sysusers.d/mdjudge.conf"
   install -Dm644 mdjudge.tmpfiles.conf "$pkgdir/usr/lib/tmpfiles.d/mdjudge.conf"
   install -Dm644 mdjudge.nginx.conf "$pkgdir/etc/nginx/lovelace.d/mdjudge.conf"
+}
+
+package_mdjudge-client() {
+  pkgdesc='mdjudge-ask: post a judgement to Will and wait for the answer'
+  depends=('python')
+  install=""
+  cd "$startdir"
+  install -Dm755 mdjudge-ask "$pkgdir/usr/bin/mdjudge-ask"
 }

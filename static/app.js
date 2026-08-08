@@ -10,14 +10,25 @@
 
 const state = { sha: null, open: null };
 
+let currentLevel = "open";
+
 function level() {
-  return localStorage.getItem("availability") || "open";
+  return currentLevel;
 }
 
-function setLevel(value) {
-  localStorage.setItem("availability", value);
+function markLevel(value) {
+  currentLevel = value;
   document.querySelectorAll("#availability button").forEach((b) =>
     b.classList.toggle("active", b.dataset.level === value));
+}
+
+async function setLevel(value) {
+  await fetch("/judge/api/availability", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ level: value }),
+  });
+  markLevel(value);
   refresh();
 }
 
@@ -118,7 +129,10 @@ async function answer(id, value) {
 document.querySelectorAll("#availability button").forEach((b) => {
   b.onclick = () => setLevel(b.dataset.level);
 });
-setLevel(level());
+fetch("/judge/api/availability").then((r) => r.json()).then((d) => {
+  markLevel(d.level);
+  refresh();
+});
 setInterval(refresh, 60000);
 document.addEventListener("visibilitychange", () => {
   if (!document.hidden) refresh();

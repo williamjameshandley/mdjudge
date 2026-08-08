@@ -38,6 +38,17 @@ def _now():
     return datetime.now(timezone.utc)
 
 
+AVAILABILITY = Path(os.environ.get("AVAILABILITY", "/var/lib/mdjudge/availability"))
+
+
+def availability_level():
+    try:
+        level = AVAILABILITY.read_text().strip()
+    except FileNotFoundError:
+        return "open"
+    return level if level in ("open", "brief", "silent") else "open"
+
+
 def queue(availability):
     db = mddb.MDDB(DECK)
     sha = db.head()
@@ -116,9 +127,13 @@ def resolve(card_id):
     """The producer's read: the card, and its bytes at the approved sha."""
     db = mddb.MDDB(DECK)
     card = db.read(card_id)
+    status = card.yaml["judgement_status"]
+    if status == "open" and "expires_epoch" in card.yaml:
+        if card.yaml["expires_epoch"] <= _now().timestamp():
+            status = "expired"
     payload = {
         "id": card.id,
-        "status": card.yaml["judgement_status"],
+        "status": status,
         "answer": card.yaml.get("answer"),
         "answered_at": card.yaml.get("answered_at"),
         "answered_by": card.yaml.get("answered_by"),
@@ -162,6 +177,9 @@ class Handler(BaseHandler):
         path = self.path.split("?", 1)[0]
         if self._serve_static(path):
             return
+        if path == "/judge/api/availability":
+            self._json(200, {"level": availability_level()})
+            return
         if path == "/judge/api/queue":
             query = dict(
                 pair.split("=", 1)
@@ -180,6 +198,14 @@ class Handler(BaseHandler):
         self._send(404, b"not found", "text/plain")
 
     def do_POST(self):
+        if self.path == "/judge/api/availability":
+            def set_level(req):
+                if req.get("level") not in ("open", "brief", "silent"):
+                    raise ValidationError("level must be open | brief | silent")
+                AVAILABILITY.write_text(req["level"] + "\n")
+                return {"level": req["level"]}
+            self._boundary(set_level, self._body())
+            return
         if self.path == "/judge/api/request":
             self._boundary(create_request, self._body())
             return

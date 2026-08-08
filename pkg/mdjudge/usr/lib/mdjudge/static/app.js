@@ -10,14 +10,25 @@
 
 const state = { sha: null, open: null };
 
+let currentLevel = "open";
+
 function level() {
-  return localStorage.getItem("availability") || "open";
+  return currentLevel;
 }
 
-function setLevel(value) {
-  localStorage.setItem("availability", value);
+function markLevel(value) {
+  currentLevel = value;
   document.querySelectorAll("#availability button").forEach((b) =>
     b.classList.toggle("active", b.dataset.level === value));
+}
+
+async function setLevel(value) {
+  await fetch("/judge/api/availability", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ level: value }),
+  });
+  markLevel(value);
   refresh();
 }
 
@@ -57,7 +68,10 @@ function card(req) {
   summary.textContent = req.summary;
   const meta = document.createElement("p");
   meta.className = "meta";
-  meta.textContent = `${req.producer}${req.expires ? " · expires " + req.expires.slice(11, 16) : ""}`;
+  const hours = (Date.now() - Date.parse(req.asked)) / 3600000;
+  const age = hours < 2 ? "fresh" : hours < 48 ? `asked ${Math.round(hours)}h ago` : `asked ${Math.round(hours / 24)}d ago — evidence may be stale`;
+  meta.textContent = `${req.producer} · ${age}${req.expires ? " · expires " + req.expires.slice(11, 16) : ""}`;
+  if (hours >= 48) meta.classList.add("stale");
   head.append(title, summary, meta);
   head.onclick = () => {
     state.open = article.classList.contains("open") ? null : req.id;
@@ -115,7 +129,10 @@ async function answer(id, value) {
 document.querySelectorAll("#availability button").forEach((b) => {
   b.onclick = () => setLevel(b.dataset.level);
 });
-setLevel(level());
+fetch("/judge/api/availability").then((r) => r.json()).then((d) => {
+  markLevel(d.level);
+  refresh();
+});
 setInterval(refresh, 60000);
 document.addEventListener("visibilitychange", () => {
   if (!document.hidden) refresh();

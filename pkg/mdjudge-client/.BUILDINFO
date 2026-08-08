@@ -1,5 +1,5 @@
 format = 2
-pkgname = mdjudge
+pkgname = mdjudge-client
 pkgbase = mdjudge
 pkgver = 0.0.2-1
 pkgarch = any
