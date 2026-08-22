@@ -1,0 +1,23 @@
+name: Final validation
+on:
+  workflow_dispatch:
+    inputs:
+      sha:
+        description: Exact candidate commit
+        required: true
+        type: string
+permissions:
+  contents: read
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.sha }}
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -e . pytest 'mddb @ git+https://github.com/handley-lab/mddb.git@master'
+      - run: scripts/check
